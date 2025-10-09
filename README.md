@@ -1,149 +1,146 @@
 # fge-read-crime-conditions
 
-Internal analytics tooling for the State Attorney General of Michoacán to batch-evaluate crime records against specific, request-driven conditions using Ollama-hosted LLMs and produce structured statistics plus summary reports.
+Herramienta analítica interna para la Fiscalía General del Estado de Michoacán que permite evaluar en lote expedientes delictivos contra condiciones específicas solicitadas, utilizando LLMs alojados en Ollama y generando estadísticas estructuradas junto con reportes ejecutivos.
 
-## Why this project exists
+## Por qué existe este proyecto
 
-Prosecutorial teams often need quick answers to bespoke investigative questions (e.g., "Which kidnapping cases mention highway blockades?"). This repository accelerates that workflow by combining:
+Los equipos de procuración de justicia suelen necesitar respuestas rápidas a preguntas de investigación hechas a la medida (por ejemplo, «¿Qué casos de secuestro mencionan bloqueos carreteros?»). Este repositorio acelera ese flujo de trabajo al combinar:
 
-- **Prompt generation** for large batches of crime narrations pulled from Excel.
-- **LLM-backed evaluation** using self-hosted Ollama models (such as `gpt-oss`).
-- **Result aggregation** that preserves ground-truth inputs and produces auditable summaries.
+- **Generación de prompts** para grandes volúmenes de narrativas delictivas tomadas desde Excel.
+- **Evaluación con LLMs** usando modelos autoalojados en Ollama (como `gpt-oss`).
+- **Agregación de resultados** que conserva los insumos originales y produce resúmenes auditables.
 
-The stack favors transparency (plain markdown prompts + JSON responses) and can be adapted to new legal conditions with minimal effort.
+La arquitectura favorece la transparencia (prompts en markdown y respuestas en JSON) y puede adaptarse a nuevas condiciones legales con un esfuerzo mínimo.
 
-## Features
+## Funcionalidades
 
-- Deterministic prompt builder with templating, JSON fencing, and deduplication by NUC.
-- Ollama client with configurable retries, JSON parsing safeguards, and summary export.
-- Automatic preservation of original narrative context in downstream responses.
-- Summary exporter that converts LLM decisions into Excel-ready analytics tables.
-- "src" layout with typed helper modules that are easy to extend and test.
+- Generador de prompts determinista con plantillas, delimitadores JSON y deduplicación por NUC.
+- Cliente de Ollama con reintentos configurables, salvaguardas de parseo JSON y exportación de resúmenes.
+- Conservación automática del contexto narrativo original en las respuestas posteriores.
+- Exportador de resúmenes que convierte las decisiones del LLM en tablas analíticas listas para Excel.
+- Estructura "src" con módulos auxiliares tipados, fáciles de extender y probar.
 
-## Project structure
+## Estructura del proyecto
 
 ```
 ├── src/
-│   ├── 0_update_prompt_config.py  # Sync prompt config from reference files
-│   ├── 1_generate_prompts.py      # Prompt creation entry point
-│   ├── 2_process_ollama.py        # Batch prompts through Ollama
-│   ├── 3_create_summary.py        # Excel summary extraction
+│   ├── 0_update_prompt_config.py  # Sincroniza la configuración del prompt desde archivos de referencia
+│   ├── 1_generate_prompts.py      # Punto de entrada para crear prompts
+│   ├── 2_process_ollama.py        # Procesa prompts en lote mediante Ollama
+│   ├── 3_create_summary.py        # Extrae el resumen en Excel
 │   └── utils/
-│       ├── prompt_builder.py      # Shared prompt templating helpers
-│       └── ollama_client.py       # Ollama chat orchestration
+│       ├── prompt_builder.py      # Funciones auxiliares compartidas para plantillas de prompts
+│       └── ollama_client.py       # Orquestación de chat con Ollama
 ├── prompt/
-│   ├── data/                    # Excel inputs kept out of version control by default
-│   ├── reference/               # Human-editable condition/template source files
-│   └── prompt_config.json       # Serialized configuration consumed by the tooling
-├── output/                      # Generated prompts, responses, and summary exports
-├── requirements.txt             # Locked dependency pins (mirrors pyproject)
-├── pyproject.toml               # Packaging + metadata for publishing/install
+│   ├── data/                    # Entradas de Excel excluidas del control de versiones (Git) por defecto
+│   ├── reference/               # Archivos fuente editables con la condición y la plantilla
+│   └── prompt_config.json       # Configuración serializada consumida por la herramienta
+├── output/                      # Prompts generados, respuestas y exportaciones de resúmenes
+├── requirements.txt             # Lista fija de dependencias (refleja pyproject)
+├── pyproject.toml               # Empaquetado y metadatos para publicación/instalación
 └── README.md
 ```
 
-## Getting started
+## Primeros pasos
 
-### Prerequisites
+### Requisitos previos
 
-- Python 3.10 or newer (pandas ≥ 2.3 requires Python 3.10+).
-- [Ollama](https://ollama.com/) installed locally with your model of choice (defaults to `gpt-oss:latest`).
-- Git LFS if you plan to store large Excel files or Ollama outputs inside the repo.
+- Python 3.10 o superior (pandas ≥ 2.3 requiere Python 3.10+).
+- [Ollama](https://ollama.com/) instalado localmente con el modelo de tu preferencia (por defecto `gpt-oss:latest`).
+- Git LFS si planeas almacenar archivos de Excel o salidas de Ollama dentro del repositorio.
 
-### Installation
+### Instalación
 
-1. Clone the repository and move into the project folder.
-2. Create and activate a virtual environment:
+1. Clona el repositorio y entra a la carpeta del proyecto.
+2. Crea y activa un entorno virtual:
 
    ```bash
    python -m venv .venv
+
    source .venv/bin/activate            # macOS / Linux
-   source .venv/Scripts/activate        # Windows Git Bash / MSYS terminals (e.g., with Starship)
-   .venv\\Scripts\\activate           # Windows PowerShell
+   source .venv/Scripts/activate        # Windows Git Bash / MSYS terminals (p. ej., con Starship)
+   .venv\\Scripts\\activate             # Windows PowerShell
    ```
 
-3. Install the package in editable mode (recommended for contributors):
+3. Instala el paquete en modo editable (recomendado para personas colaboradoras):
 
    ```bash
    pip install -e .
    ```
 
-4. Verify installation by running one of the numbered scripts (see below), for example:
+4. Verifica la instalación ejecutando alguno de los scripts numerados (ver más abajo), por ejemplo:
 
    ```bash
    python src/1_generate_prompts.py
    ```
 
-### Configuration inputs
+### Insumos de configuración
 
-Key configurable assets can be found under the `prompt/` directory:
+Los activos configurables principales se encuentran en el directorio `prompt/`:
 
-| File                             | Purpose                                                                                                  |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `prompt/prompt_config.json`      | Unified configuration containing the condition, prompt template, model name, and optional output schema. |
-| `prompt/reference/condition.txt` | Plain-text reference for the current investigative condition.                                            |
-| `prompt/reference/template.txt`  | Prompt body with placeholders `{{CONDITION}}`, `{{RECORD_JSON}}`, and `{{OUTPUT_SCHEMA}}`.               |
-| `prompt/data/sample.xlsx`        | Example Excel input; replace with campaign-specific extracts (gitignored by default).                    |
+| Archivo                          | Propósito                                                                                                                |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `prompt/prompt_config.json`      | Configuración unificada con la condición, la plantilla del prompt, el nombre del modelo y un esquema opcional de salida. |
+| `prompt/reference/condition.txt` | Referencia en texto plano para la condición de investigación vigente.                                                    |
+| `prompt/reference/template.txt`  | Cuerpo del prompt con los marcadores `{{CONDITION}}`, `{{RECORD_JSON}}` y `{{OUTPUT_SCHEMA}}`.                           |
+| `prompt/data/sample.xlsx`        | Ejemplo de entrada en Excel; reemplázalo con extractos específicos de cada campaña (ignorado por git).                   |
 
-Swap in a new `sample.xlsx` or replicate the folder for each campaign.
+Sustituye `sample.xlsx` o replica la carpeta para cada campaña.
 
-## CLI workflows
+## Flujos desde la línea de comandos
 
-Once the package is installed, run the numbered scripts directly with Python:
+Una vez instalado el paquete, ejecuta los scripts numerados directamente con Python:
 
-| Command                                | Description                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `python src/0_update_prompt_config.py` | Refreshes `prompt/prompt_config.json` from files in `prompt/reference/`.                                      |
-| `python src/1_generate_prompts.py`     | Reads `prompt/data/sample.xlsx`, deduplicates by NUC, and emits markdown prompts into `output/prompts/`.      |
-| `python src/2_process_ollama.py`       | Sends generated prompts to Ollama, writes JSON responses in `output/responses/`, and generates a run summary. |
-| `python src/3_create_summary.py`       | Walks responses and writes an analytics spreadsheet to `output/summary/results.xlsx`.                         |
+| Comando                                | Descripción                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `python src/0_update_prompt_config.py` | Actualiza `prompt/prompt_config.json` a partir de los archivos en `prompt/reference/`.                                    |
+| `python src/1_generate_prompts.py`     | Lee `prompt/data/sample.xlsx`, deduplica por NUC y genera prompts en markdown dentro de `output/prompts/`.                |
+| `python src/2_process_ollama.py`       | Envía los prompts generados a Ollama, escribe respuestas JSON en `output/responses/` y construye un resumen de ejecución. |
+| `python src/3_create_summary.py`       | Recorre las respuestas y produce una hoja analítica en `output/summary/results.xlsx`.                                     |
 
-Each script accepts the defaults shown in code. For campaign-specific paths, fork the scripts or add argument parsing (see "Future enhancements").
+Cada script acepta los valores predeterminados que se muestran en el código. Para rutas específicas de una campaña, duplica los scripts o añade análisis de argumentos (ver la sección «Mejoras futuras»).
 
-## Running the pipeline
+## Ejecución del pipeline
 
-1. **Prepare data**: Place your Excel source in `prompt/data/sample.xlsx` and confirm `prompt_config.json` describes the desired condition/template.
-2. **Update prompt config** (optional, run when `prompt/reference` changes):
+1. **Preparar datos**: coloca tu fuente de Excel en `prompt/data/sample.xlsx` y confirma que `prompt_config.json` describa la condición y plantilla deseadas.
+2. **Actualizar la configuración del prompt** (opcional, ejecútalo cuando cambie `prompt/reference`):
 
    ```bash
    python src/0_update_prompt_config.py
    ```
 
-3. **Generate prompts**:
+3. **Generar prompts**:
 
    ```bash
    python src/1_generate_prompts.py
    ```
 
-4. **Process with Ollama** (ensure the Ollama daemon is running):
+4. **Procesar con Ollama** (asegúrate de que el daemon de Ollama esté en ejecución):
 
    ```bash
-   ollama run gpt-oss:latest --help   # optional sanity check
+   ollama run gpt-oss:latest --help   # comprobación opcional
    python src/2_process_ollama.py
    ```
 
-5. **Export summary**:
+5. **Exportar resumen**:
 
    ```bash
    python src/3_create_summary.py
    ```
 
-Outputs are stored under `output/` and reuse existing files when re-run. Failed requests are retried automatically; inspect `_response.json` files for full context.
+Los resultados se guardan en `output/` y reutilizan archivos existentes cuando se vuelve a ejecutar. Las peticiones fallidas se reintentan automáticamente; revisa los archivos `_response.json` para obtener el contexto completo.
 
-## Data handling & privacy
+## Manejo de datos y privacidad
 
-- Never commit raw case files containing personal data. The root `.gitignore` already excludes `output/` and `prompt/data/` to keep sensitive artifacts out of version control.
-- When sharing prompt templates publicly, redact sensitive condition wording and examples.
-- The repository intentionally keeps prompts and responses as human-readable markdown/JSON to support auditing.
+- Nunca hagas commit de expedientes originales que contengan datos personales. El `.gitignore` raíz ya excluye `output/` y `prompt/data/` para mantener esos materiales fuera del control de versiones.
+- Si compartes públicamente plantillas de prompts, redacta la redacción sensible de la condición y los ejemplos.
+- El repositorio mantiene los prompts y respuestas en formato legible (markdown/JSON) para facilitar las auditorías.
 
-## Contributing
+## Contribuciones
 
-1. Fork and branch from `main` (the repository currently tracks only the `main` branch).
-2. Run `pip install -e .[dev]` once a dev extras group is defined (see roadmap).
-3. Apply formatting/tests before opening a PR.
-4. Use conventional commit messages when possible (`feat:`, `fix:`, etc.).
+1. Haz fork y crea una rama desde `main`
+2. Ejecuta `pip install -e .`
+3. Aplica formato y pruebas antes de abrir un PR.
+4. Usa mensajes de commit convencionales cuando sea posible (`feat:`, `fix:`, etc.).
 
-Please open an issue for architectural changes or enhancements.
-
-## License
-
-The project currently ships without an open-source license. Until one is selected and added to `LICENSE`, the default assumption is "All rights reserved". Choose a license before making the repository public.
+Por favor abre un issue para cambios arquitectónicos o mejoras.
