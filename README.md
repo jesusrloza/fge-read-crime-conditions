@@ -24,18 +24,18 @@ The stack favors transparency (plain markdown prompts + JSON responses) and can 
 
 ```
 ├── src/
-│   ├── generate_prompts.py      # CLI entry point for prompt creation
-│   ├── process_ollama.py        # CLI entry point to batch prompts through Ollama
-│   ├── create_summary.py        # CLI entry point for Excel summary extraction
+│   ├── 0_update_prompt_config.py  # Sync prompt config from reference files
+│   ├── 1_generate_prompts.py      # Prompt creation entry point
+│   ├── 2_process_ollama.py        # Batch prompts through Ollama
+│   ├── 3_create_summary.py        # Excel summary extraction
 │   └── utils/
-│       ├── prompt_builder.py    # Shared prompt templating helpers
-│       └── ollama_client.py     # Ollama chat orchestration
+│       ├── prompt_builder.py      # Shared prompt templating helpers
+│       └── ollama_client.py       # Ollama chat orchestration
 ├── prompt/
 │   ├── data/                    # Excel inputs kept out of version control by default
 │   ├── reference/               # Human-editable condition/template source files
 │   └── prompt_config.json       # Serialized configuration consumed by the tooling
 ├── output/                      # Generated prompts, responses, and summary exports
-├── examples/                    # Sample data and prompt configs for reference
 ├── requirements.txt             # Locked dependency pins (mirrors pyproject)
 ├── pyproject.toml               # Packaging + metadata for publishing/install
 └── README.md
@@ -66,12 +66,10 @@ The stack favors transparency (plain markdown prompts + JSON responses) and can 
    pip install -e .
    ```
 
-   > This pulls dependencies from `pyproject.toml`. If you prefer the classic workflow, `pip install -r requirements.txt` produces the same environment.
-
-4. Verify installation:
+4. Verify installation by running one of the numbered scripts (see below), for example:
 
    ```bash
-   fgcrc-generate-prompts --help
+   python src/1_generate_prompts.py
    ```
 
 ### Configuration inputs
@@ -85,53 +83,60 @@ Key configurable assets can be found under the `prompt/` directory:
 | `prompt/reference/template.txt`  | Prompt body with placeholders `{{CONDITION}}`, `{{RECORD_JSON}}`, and `{{OUTPUT_SCHEMA}}`.               |
 | `prompt/data/sample.xlsx`        | Example Excel input; replace with campaign-specific extracts (gitignored by default).                    |
 
-Swap in a new `sample.xlsx` or replicate the folder for each campaign. The `examples/` directory documents successful structures used in the field.
+Swap in a new `sample.xlsx` or replicate the folder for each campaign.
 
 ## CLI workflows
 
-Once the package is installed, you can invoke the tooling via the registered console scripts (or `python -m ...` equivalents):
+Once the package is installed, run the numbered scripts directly with Python:
 
-| Command                  | Description                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `fgcrc-generate-prompts` | Reads `prompt/data/sample.xlsx`, deduplicates by NUC, and emits markdown prompts into `output/prompts/`.      |
-| `fgcrc-process-ollama`   | Sends generated prompts to Ollama, writes JSON responses in `output/responses/`, and generates a run summary. |
-| `fgcrc-create-summary`   | Walks responses and writes an analytics spreadsheet to `output/summary/results.xlsx`.                         |
+| Command                                | Description                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `python src/0_update_prompt_config.py` | Refreshes `prompt/prompt_config.json` from files in `prompt/reference/`.                                      |
+| `python src/1_generate_prompts.py`     | Reads `prompt/data/sample.xlsx`, deduplicates by NUC, and emits markdown prompts into `output/prompts/`.      |
+| `python src/2_process_ollama.py`       | Sends generated prompts to Ollama, writes JSON responses in `output/responses/`, and generates a run summary. |
+| `python src/3_create_summary.py`       | Walks responses and writes an analytics spreadsheet to `output/summary/results.xlsx`.                         |
 
 Each script accepts the defaults shown in code. For campaign-specific paths, fork the scripts or add argument parsing (see "Future enhancements").
 
 ## Running the pipeline
 
 1. **Prepare data**: Place your Excel source in `prompt/data/sample.xlsx` and confirm `prompt_config.json` describes the desired condition/template.
-2. **Generate prompts**:
+2. **Update prompt config** (optional, run when `prompt/reference` changes):
 
    ```bash
-   fgcrc-generate-prompts
+   python src/0_update_prompt_config.py
    ```
 
-3. **Process with Ollama** (ensure the Ollama daemon is running):
+3. **Generate prompts**:
+
+   ```bash
+   python src/1_generate_prompts.py
+   ```
+
+4. **Process with Ollama** (ensure the Ollama daemon is running):
 
    ```bash
    ollama run gpt-oss:latest --help   # optional sanity check
-   fgcrc-process-ollama
+   python src/2_process_ollama.py
    ```
 
-4. **Export summary**:
+5. **Export summary**:
 
    ```bash
-   fgcrc-create-summary
+   python src/3_create_summary.py
    ```
 
 Outputs are stored under `output/` and reuse existing files when re-run. Failed requests are retried automatically; inspect `_response.json` files for full context.
 
 ## Data handling & privacy
 
-- Never commit raw case files containing personal data. Use `output/.gitignore` rules (included) to keep sensitive artifacts out of version control.
+- Never commit raw case files containing personal data. The root `.gitignore` already excludes `output/` and `prompt/data/` to keep sensitive artifacts out of version control.
 - When sharing prompt templates publicly, redact sensitive condition wording and examples.
 - The repository intentionally keeps prompts and responses as human-readable markdown/JSON to support auditing.
 
 ## Contributing
 
-1. Fork and branch from `main`.
+1. Fork and branch from `main` (the repository currently tracks only the `main` branch).
 2. Run `pip install -e .[dev]` once a dev extras group is defined (see roadmap).
 3. Apply formatting/tests before opening a PR.
 4. Use conventional commit messages when possible (`feat:`, `fix:`, etc.).

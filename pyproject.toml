@@ -7,10 +7,10 @@ name = "fge-read-crime-conditions"
 version = "0.0.1"
 description = "Internal analytics tooling for the State Attorney General of Michoacán to batch-evaluate crime records against request-driven conditions using Ollama-hosted LLMs."
 readme = "README.md"
-requires-python = ">=3.13"
-license = { text = "UNLICENSED" }
+requires-python = ">=3.10"
+license = { text = "All rights reserved" }
 authors = [
-  { name = "State Attorney General of Michoacán", email = "analitica@fiscaliageneral.gob.mx" }
+  { name = "Jesús R. Loza", email = "jesusr.loza@gmail.com" }
 ]
 keywords = ["ollama", "llm", "crime-analytics", "michoacan", "law-enforcement"]
 dependencies = [
@@ -43,20 +43,15 @@ dependencies = [
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.10",
   "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Information Analysis"
 ]
 
 [project.urls]
-Repository = "https://github.com/your-org/fge-read-crime-conditions"
-"Issue Tracker" = "https://github.com/your-org/fge-read-crime-conditions/issues"
-
-[project.scripts]
-fgcrc-generate-prompts = "src.generate_prompts:main"
-fgcrc-process-ollama = "src.process_ollama:main"
-fgcrc-create-summary = "src.create_summary:main"
+Repository = "https://github.com/jesusrloza/fge-read-crime-conditions"
+"Issue Tracker" = "https://github.com/jesusrloza/fge-read-crime-conditions/issues"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
