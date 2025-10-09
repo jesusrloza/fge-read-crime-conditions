@@ -57,6 +57,7 @@ The stack favors transparency (plain markdown prompts + JSON responses) and can 
    ```bash
    python -m venv .venv
    source .venv/bin/activate            # macOS / Linux
+   source .venv/Scripts/activate        # Windows Git Bash / MSYS terminals (e.g., with Starship)
    .venv\\Scripts\\activate           # Windows PowerShell
    ```
 

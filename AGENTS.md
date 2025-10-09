@@ -20,6 +20,8 @@ After activating the virtual environment, install the required packages:
 # Activate virtual environment first (see below)
 source .venv/bin/activate  # Linux/macOS
 # or
+source .venv/Scripts/activate  # Windows Git Bash / MSYS terminals (e.g., with Starship)
+# or
 .venv\Scripts\activate     # Windows
 
 # Install dependencies
@@ -56,6 +58,7 @@ If the standard paths don't work, try these alternatives:
 
 - `.venv\Scripts\activate.bat` (older Windows versions)
 - `.\.venv\Scripts\Activate.ps1` (if using relative path)
+- `source .venv/Scripts/activate` (Git Bash / MSYS terminals)
 
 **Linux/macOS:**
 
@@ -134,6 +137,10 @@ pip install -r requirements.txt
 # Deactivate virtual environment
 deactivate
 ```
+
+#### VS Code integrated terminal quirk
+
+Some VS Code terminals occasionally drop the very first character typed or pasted (e.g., `mv` becomes `v`). If a command fails unexpectedly, press ↑ to recall it and re-run—on the second try it usually executes correctly.
 
 ### Development Notes
 
