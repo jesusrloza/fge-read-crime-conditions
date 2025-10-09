@@ -1,0 +1,5 @@
+La víctima debe ser estudiante o trabajador con vínculo directo (docente, administrativo, de mantenimiento, personal temporal como pintores, vigilantes, técnicos, u otros roles) de una institución educativa de cualquier nivel o tipo, siempre que en dicha institución se impartan cursos, clases, talleres, capacitaciones o programas formativos (por ejemplo: primaria, universidad, centro de capacitación, escuela de idiomas, escuela de natación, etc.).
+
+Debe marcarse como verdadero únicamente cuando la narrativa muestre claramente que la víctima tenía esa relación directa con la institución.
+
+No se debe marcar como verdadero si el delito ocurrió únicamente dentro, en las afueras o cerca de una institución educativa por mera coincidencia, sin que la víctima fuera estudiante ni trabajador relacionado (ej. robo a transeúnte frente a la escuela, homicidio de una persona ajena que se refugió en la institución, hechos en instalaciones escolares sin relación con alumnos o empleados).

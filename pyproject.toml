@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fge-read-crime-conditions"
+version = "0.0.1"
+description = "Internal analytics tooling for the State Attorney General of Michoacán to batch-evaluate crime records against request-driven conditions using Ollama-hosted LLMs."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "UNLICENSED" }
+authors = [
+  { name = "State Attorney General of Michoacán", email = "analitica@fiscaliageneral.gob.mx" }
+]
+keywords = ["ollama", "llm", "crime-analytics", "michoacan", "law-enforcement"]
+dependencies = [
+  "annotated-types==0.7.0",
+  "anyio==4.11.0",
+  "attrs==25.4.0",
+  "certifi==2025.10.5",
+  "et_xmlfile==2.0.0",
+  "h11==0.16.0",
+  "httpcore==1.0.9",
+  "httpx==0.28.1",
+  "idna==3.10",
+  "jsonschema==4.25.1",
+  "jsonschema-specifications==2025.9.1",
+  "numpy==2.3.3",
+  "ollama==0.5.3",
+  "openpyxl==3.1.5",
+  "pandas==2.3.2",
+  "pydantic==2.12.0",
+  "pydantic_core==2.41.1",
+  "python-dateutil==2.9.0.post0",
+  "pytz==2025.2",
+  "referencing==0.36.2",
+  "rpds-py==0.27.1",
+  "six==1.17.0",
+  "sniffio==1.3.1",
+  "typing-inspection==0.4.2",
+  "typing_extensions==4.15.0",
+  "tzdata==2025.2"
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+  "License :: Other/Proprietary License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Information Analysis"
+]
+
+[project.urls]
+Repository = "https://github.com/your-org/fge-read-crime-conditions"
+"Issue Tracker" = "https://github.com/your-org/fge-read-crime-conditions/issues"
+
+[project.scripts]
+fgcrc-generate-prompts = "src.generate_prompts:main"
+fgcrc-process-ollama = "src.process_ollama:main"
+fgcrc-create-summary = "src.create_summary:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["src*"]

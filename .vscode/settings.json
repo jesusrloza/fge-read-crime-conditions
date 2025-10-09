@@ -1,0 +1,7 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "autopep8.args": ["--ignore=E4"],
+  "cSpell.words": ["ollama"]
+}
